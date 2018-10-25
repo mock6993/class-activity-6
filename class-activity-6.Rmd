@@ -7,15 +7,15 @@ output: html_document
 # Data Management
 ```{r}
 #Load data
-DF1 <- read.csv("cluster.csv", header = TRUE)
+DF1 <- read.csv("HUDK405018-cluster.csv", header = TRUE)
   
 #Wrangle data
-DF1 <- DF1[3,]  
+DF1 <- DF1[-c(1,2),]  
 ```
 
 # Find lattitudes & longitudes for cities
 ```{r}
-install.packages("ggmap")
+#install.packages("ggmap")
 library(ggmap)
 
 #Request lattitude and longitude from Google Maps API
@@ -36,7 +36,7 @@ Also, we need to choose the number of clusters we think are in the data. We will
 
 ```{r}
 
-fit <- kmeans(LL, 1) 
+fit <- kmeans(DF2, 4) 
 
 #We have created an object called "fit" that contains all the details of our clustering including which observations belong to each cluster.
 
@@ -46,18 +46,36 @@ fit$cluster
 
 #We can also attach these clusters to te original dataframe by using the "data.frame" command to create a new data frame called K4.
 
-DF3 <- data.frame(LL, fit$cluster)
+DF3 <- data.frame(DF2, fit$cluster)
 
 #Have a look at the K4 dataframe. Lets change the names of the variables to make it more convenient with the names() command.
 
-names(DF3) <- c("1", "2", "3", "4", "5", "cluster") #c() stands for concatonate and it creates a vector of anything, in this case a vector of names.
+names(DF3) <- c("long", "lat",  "cluster") #c() stands for concatonate and it creates a vector of anything, in this case a vector of names.
 
 ```
 
 # Visualize your clusters in ggplot
 ```{r}
 #Create a scatterplot that plots location of each student and colors the points according to their cluster 
+plot(DF3$long, DF3$lat, col=DF3$cluster)
 ```
 
 # Can you group students according to their weekly activities?
+```{r}
+library(tidyr)
+library(dplyr)
+DF4 <- select(DF1, Q2_1, Q2_2, Q2_3, Q2_4, Q2_5, Q2_6, Q2_7)
+DF4 <-rapply(DF4, f=function(x) ifelse(is.nan(x),0,x), how="replace" )
+fit2 <- kmeans(DF4, 6)
+```
 
+
+```{r}
+fit2$cluster
+
+#We can also attach these clusters to te original dataframe by using the "data.frame" command to create a new data frame called K4.
+
+DF5 <- data.frame(DF4, fit2$cluster)
+names(DF5) <- c("A", "B", "C", "D", "E", "F", "G", "cluster")
+plot(DF5$B, DF5$C, col=DF5$cluster)
+```
